@@ -68,9 +68,9 @@ shopt -s extglob
 # OPTIONS:
 #  
 #   -r        Create a working directory called <hostname>/<timestamp> to store
-#             the kitrace data and reports.   Works well for environments where
+#             the kitrace data and reports.  Works well for environments where
 #             multiple kitrace data files have been created for the same system
-#             or in muli-system environments.  A
+#             or in multi-system environments.
 #
 #   -c        For KI data from a cluster.  Creates multiple working directories
 #             of the form <timestamp>/<hostname>.  Generates KI reports for each
@@ -122,7 +122,7 @@ dovis=0
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-t timestamp]\n" "$0"
+	printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-t timestamp]\n" "$0"
 	printf "       -h               Help\n"
 	printf "       -l               Lite version - bypasses some options\n" 
 	printf "       -m               Do not process collectl or MWA data\n"
@@ -138,66 +138,66 @@ help()
 getnodename()
 {
 # tag must be set
-    for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
-    do
+	for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	do
 	if [ ! -z $NODENAME ]; then
-	    if [ $NODENAME = "$tag" ]; then
-		NODENAME=""
-	    fi
+		if [ $NODENAME = "$tag" ]; then
+			NODENAME=""
+		fi
 	fi
-    done
+	done
 }
 
 extract_ki_files()
 {
 # tag and NODENAME must be set 
 # First, unzip regular files; not tar archives 
-    for file in `ls *$tag*gz 2>/dev/null | grep -E -v "\.tar|\.tgz"`
-    do
-        echo gunzip $file
-        gunzip $file
-    done
+	for file in `ls *$tag*gz 2>/dev/null | grep -E -v "\.tar|\.tgz"`
+	do
+		echo gunzip $file
+		gunzip $file
+	done
 
 # Check to see if ki.bin or etl files exist.   If so, then we can return 
-    if [ -f ki.bin.$tag ] ; then 
-	return
-    fi
-    if [ -f ki.bin.000.$tag ] ; then
-	return
-    fi
-    if [ -f ki.$tag.etl ] ; then
-	return
-    fi
+	if [ -f ki.bin.$tag ] ; then 
+		return
+	fi
+	if [ -f ki.bin.000.$tag ] ; then
+		return
+	fi
+	if [ -f ki.$tag.etl ] ; then
+		return
+	fi
 
 # if there are no ki.bin files, then try to extract from ki_all tar files 
-    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-	gzip ki_all.$NODENAME.$tag.tar
-    fi 
-    if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
-	mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
-    fi 
-    if [ -f ki_all.$tag.tar ] ; then
-	gzip ki_all.$tag.tar
-    fi 
-    if [ -f ki_all.$tag.tar.gz ] ; then
-	mv ki_all.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
-    fi 
+	if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+		gzip ki_all.$NODENAME.$tag.tar
+	fi 
+	if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+		mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+	fi 
+	if [ -f ki_all.$tag.tar ] ; then
+		gzip ki_all.$tag.tar
+	fi 
+	if [ -f ki_all.$tag.tar.gz ] ; then
+		mv ki_all.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+	fi 
 
-    if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
-	tar xf ki_all.$NODENAME.$tag.tgz
-    elif [ -f ki_all.$tag.tgz ] ; then
-	tar xf ki_all.$tag.tgz
-    fi
+	if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
+		tar xf ki_all.$NODENAME.$tag.tgz
+	elif [ -f ki_all.$tag.tgz ] ; then
+		tar xf ki_all.$tag.tgz
+	fi
 
 # Check for Windows ZIP file 
-    if [ -f ki_all.$NODENAME.$tag.zip ] ; then
-	unzip ki_all.$NODENAME.$tag.zip
-    elif [ -f ki_all.$tag.zip ]; then
-	unzip ki_all.$tag.zip
-    fi
+	if [ -f ki_all.$NODENAME.$tag.zip ] ; then
+		unzip ki_all.$NODENAME.$tag.zip
+	elif [ -f ki_all.$tag.zip ]; then
+		unzip ki_all.$tag.zip
+	fi
 
 # add read access to the files 
-    chmod +r *.$tag  >/dev/null 2>&1
+	chmod +r *.$tag  >/dev/null 2>&1
 }
 
 likimerge()
@@ -352,170 +352,170 @@ process_V()
 
 process_pwd()
 {
-    ls ki*.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* >/dev/null 2>&1
-    if [ $? -ne 0 ] ; then
-	return;
-    fi
-    for tag in `ls ki*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* | grep -v "ki.err" | grep -v "\.csv" | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
-    do
-	if [ ! -z "$intag" ] ; then
-	    if [ $tag = $intag ] ; then
-		:
-	    else
-		continue	
-	    fi
+	ls ki*.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		return;
 	fi
-
-        echo "Processing files in: "$PWD
-	for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	for tag in `ls ki*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* | grep -v "ki.err" | grep -v "\.csv" | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
 	do
-	    if [ ! -z $NODENAME ]; then
-		if [ $NODENAME = "$tag" ]; then
-		    NODENAME=""
-	        fi
-	    fi
-        done
+		if [ ! -z "$intag" ] ; then
+			if [ $tag = $intag ] ; then
+			:
+			else
+				continue	
+			fi
+		fi
 
-        extract_ki_files
+		echo "Processing files in: "$PWD
+		for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+		do
+			if [ ! -z $NODENAME ]; then
+				if [ $NODENAME = "$tag" ]; then
+					NODENAME=""
+				fi
+			fi
+		done
+
+		extract_ki_files
 
 # Check for Windows ETL file first 
-	if [ -f ki.$tag.etl ] ; then
-	    if [ ! -f ki.bin.000.$tag ] ; then
-		$DIR/kiinfo -etldump -ts $tag
-	    fi
-	elif [ -f ki.bin.000.$tag ] ; then
-	    likimerge
-	fi
+		if [ -f ki.$tag.etl ] ; then
+			if [ ! -f ki.bin.000.$tag ] ; then
+				$DIR/kiinfo -etldump -ts $tag
+			fi
+		elif [ -f ki.bin.000.$tag ] ; then
+			likimerge
+		fi
 
-	if [ -f ki.bin.$tag ] ; then
-	    process_ki
-	elif [ -f ki.bin.000.$tag ] ; then
-	    if [ -f ki.$tag.etl ] ; then
-		process_winki	
-	    else
-		process_ki
-	    fi
-	else
-	    echo "No ki.bin files found for $tag"
-	fi
-    done
+		if [ -f ki.bin.$tag ] ; then
+			process_ki
+		elif [ -f ki.bin.000.$tag ] ; then
+			if [ -f ki.$tag.etl ] ; then
+				process_winki	
+			else
+				process_ki
+			fi
+		else
+			echo "No ki.bin files found for $tag"
+		fi
+	done
 }
 
 process_r()
 {
 #   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
 
-    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
-    if [ $? -ne 0 ] ; then
-	echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
-	return;
-    fi
-    for tag in `ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
-    do
-	if [ ! -z "$intag" ] ; then
-	    if [ $tag = $intag ] ; then
-		:
-	    else
-		continue	
-	    fi
+	ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
+		return;
 	fi
-
-	for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	for tag in `ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
 	do
-	    if [ ! -z $NODENAME ] ; then
-	        if [ ! -d $NODENAME ] ; then
-		    mkdir $NODENAME
-		fi
-		if [ ! -d $NODENAME/$tag ] ; then
-	 	    mkdir $NODENAME/$tag
+		if [ ! -z "$intag" ] ; then
+			if [ $tag = $intag ] ; then
+				:
+			else
+				continue	
+			fi
 		fi
 
-		if [ -f ki_all.$NODENAME.$tag.zip ] ; then
-		    mv ki_all.$NODENAME.$tag.zip $NODENAME/$tag/ki_all.$NODENAME.$tag.zip
-		else
-		    mv ki_all.$NODENAME.$tag.tgz $NODENAME/$tag/ki_all.$NODENAME.$tag.tgz
-		fi
-		cd $NODENAME/$tag
-		process_pwd
-	    	cd $SAVED_PWD
-	    fi
-        done
-    done
+		for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+		do
+			if [ ! -z $NODENAME ] ; then
+				if [ ! -d $NODENAME ] ; then
+					mkdir $NODENAME
+				fi
+				if [ ! -d $NODENAME/$tag ] ; then
+					mkdir $NODENAME/$tag
+				fi
+
+				if [ -f ki_all.$NODENAME.$tag.zip ] ; then
+					mv ki_all.$NODENAME.$tag.zip $NODENAME/$tag/ki_all.$NODENAME.$tag.zip
+				else
+					mv ki_all.$NODENAME.$tag.tgz $NODENAME/$tag/ki_all.$NODENAME.$tag.tgz
+				fi
+				cd $NODENAME/$tag
+				process_pwd
+				cd $SAVED_PWD
+			fi
+		done
+	done
 }
 
 process_c()
 {
 #   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
 
-    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
-    if [ $? -ne 0 ] ; then
+	ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
 #	if there are no ki_all files, then simply run kiinfo in cwd if the -t option is passed
-	if [ ! -z "$intag" ] ; then
-	    if [ $dovis -eq 0 ] ; then
-                echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag
-                $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag  >cp.$intag.html
-            else
-                echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag
-                $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag  >cp.$intag.html
-            fi    
-	else
-	    echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
-	fi
+		if [ ! -z "$intag" ] ; then
+			if [ $dovis -eq 0 ] ; then
+				echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag
+				$DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag  >cp.$intag.html
+			else
+				echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag
+				$DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag  >cp.$intag.html
+			fi
+		else
+			echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
+		fi
 	return
-    fi
-
-    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) 2>/dev/null | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
-    do
-	if [ ! -z "$intag" ] ; then
-	    if [ $tag = $intag ] ; then
-		:
-	    else
-		continue	
-	    fi
 	fi
 
-	for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) 2>/dev/null | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
 	do
-	    if [ ! -d $tag ] ; then
-		mkdir $tag
-	    fi
+		if [ ! -z "$intag" ] ; then
+			if [ $tag = $intag ] ; then
+				:
+			else
+				continue	
+			fi
+		fi
 
-	    if [ ! -z $NODENAME ] ; then
-		rm -rf $tag/$NODENAME
-		mkdir $tag/$NODENAME
-		mv ki_all.$NODENAME.$tag?(.tgz|.zip) $tag/$NODENAME
-		cd $tag/$NODENAME
-		process_pwd
-	    	cd $SAVED_PWD
-	    fi
-        done
-	cd $tag
-	if [ $dovis -eq 0 ] ; then
-                echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag
-                $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag  >cp.$tag.html
-        else
-                echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag
-                $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag  >cp.$tag.html
+		for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+		do
+			if [ ! -d $tag ] ; then
+				mkdir $tag
+			fi
 
-	echo Symlinking cluster timeline files
-    	ln -s $EVDIR/cluster_timeline.html cluster_timeline.html > /dev/null 2>&1
-    	ln -s $EVDIR/timeline.php timeline.php > /dev/null 2>&1
-	ln -s $EDIR/D3 D3 > /dev/null 2>&1
+			if [ ! -z $NODENAME ] ; then
+				rm -rf $tag/$NODENAME
+				mkdir $tag/$NODENAME
+				mv ki_all.$NODENAME.$tag?(.tgz|.zip) $tag/$NODENAME
+				cd $tag/$NODENAME
+				process_pwd
+				cd $SAVED_PWD
+			fi
+		done
+		cd $tag
+		if [ $dovis -eq 0 ] ; then
+			echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag
+			$DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag  >cp.$tag.html
+		else
+			echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag
+			$DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag  >cp.$tag.html
 
-        fi
-	cd $SAVED_PWD
-    done
+			echo Symlinking cluster timeline files
+			ln -s $EVDIR/cluster_timeline.html cluster_timeline.html > /dev/null 2>&1
+			ln -s $EVDIR/timeline.php timeline.php > /dev/null 2>&1
+			ln -s $EDIR/D3 D3 > /dev/null 2>&1
+
+		fi
+		cd $SAVED_PWD
+	done
 }
 
 process_f()
 {
-    for SUBDIR in `find . -type d `
-    do
-	cd $SUBDIR
-	process_pwd
-	cd $SAVED_PWD
-	wait
-    done
+	for SUBDIR in `find . -type d `
+	do
+		cd $SUBDIR
+		process_pwd
+		cd $SAVED_PWD
+		wait
+	done
 }
 
 while [ "`echo $1 | cut -c1`" = "-" ] ; do
@@ -592,28 +592,28 @@ while [ "`echo $1 | cut -c1`" = "-" ] ; do
 done
 			
 if [ $rflag -eq 1 -a $cflag -eq 1 ] ; then
-    echo "ERROR: Cannot use both -r and -c options"
-    exit 9
+	echo "ERROR: Cannot use both -r and -c options"
+	exit 9
 fi
 
 if [ $rflag -eq 1 -a $fflag -eq 1 ] ; then
-    echo "ERROR: Cannot use both -r and -f options"
-    exit 10 
+	echo "ERROR: Cannot use both -r and -f options"
+	exit 10 
 fi
 
 if [ $cflag -eq 1 -a $fflag -eq 1 ] ; then
-    echo "ERROR: Cannot use both -r and -f options"
-    exit 10 
+	echo "ERROR: Cannot use both -r and -f options"
+	exit 10 
 fi
 
 if [ $rflag -eq 1 ] ; then
-  process_r
+	process_r
 elif [ $cflag -eq 1 ] ; then
-  process_c
+	process_c
 elif [ $fflag -eq 1 ] ; then
-  process_f
+	process_f
 else
-  process_pwd
+	process_pwd
 fi
 
 cd $SAVED_PWD
